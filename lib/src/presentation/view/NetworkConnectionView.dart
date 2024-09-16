@@ -50,8 +50,8 @@ class NetworkConnectionView extends StatelessWidget {
                                 : AppString.of(Config.currentLanguage)
                                     .openConnection,
                             onPressed: viewModel.isOpened
-                                ? viewModel.closeNetworkConnection
-                                : viewModel.openNetworkConnection))
+                                ? viewModel.close
+                                : viewModel.open))
                   ]))
             ]));
   }
