@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:remotestoragelite/src/domain/usecases/AutoFindStoragePath.dart';
+import 'package:remotestoragelite/src/domain/usecases/FindStoragePath.dart';
+import 'package:remotestoragelite/src/domain/usecases/UpdateDirectory.dart';
 import 'package:remotestoragelite/src/presentation/widget/AppDirectoryView.dart';
 
 class DirectoryViewModel extends ChangeNotifier {
   FileNode get root => _root;
   String get rootPath => _rootPath;
 
-  void autoFind() {}
-  void find() {}
+  AutoFindStoragePath autoFindStoragePath;
+  FindStoragePath findStoragePath;
+  UpdateDirectory updateDirectory;
+
+  DirectoryViewModel(
+      {required this.autoFindStoragePath,
+      required this.findStoragePath,
+      required this.updateDirectory});
+
+  Future<void> autoFind() async {
+    _rootPath = await autoFindStoragePath();
+    notifyListeners();
+  }
+
+  Future<void> find() async {
+    _rootPath = await findStoragePath();
+    notifyListeners();
+  }
 
   String _rootPath = "C:\\SANS\\PAPYRUS";
   final _root =

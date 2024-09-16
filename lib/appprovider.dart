@@ -1,14 +1,19 @@
 import 'package:provider/provider.dart';
 import 'package:remotestoragelite/src/data/repositories/NetworkConnectionRepositoryImpl.dart';
+import 'package:remotestoragelite/src/data/repositories/StorageRepositoryImpl.dart';
 import 'package:remotestoragelite/src/data/repositories/ToastMessageRepositoryImpl.dart';
 import 'package:remotestoragelite/src/domain/repositories/NetworkConnectionRepository.dart';
+import 'package:remotestoragelite/src/domain/repositories/StorageRepository.dart';
 import 'package:remotestoragelite/src/domain/repositories/ToastMessageRepository.dart';
+import 'package:remotestoragelite/src/domain/usecases/AutoFindStoragePath.dart';
 import 'package:remotestoragelite/src/domain/usecases/CloseNetworkConnection.dart';
 import 'package:remotestoragelite/src/domain/usecases/FindIpAddress.dart';
+import 'package:remotestoragelite/src/domain/usecases/FindStoragePath.dart';
 import 'package:remotestoragelite/src/domain/usecases/LoadPort.dart';
 import 'package:remotestoragelite/src/domain/usecases/OpenNetworkConnection.dart';
 import 'package:remotestoragelite/src/domain/usecases/SavePort.dart';
 import 'package:remotestoragelite/src/domain/usecases/ShowToastMessage.dart';
+import 'package:remotestoragelite/src/domain/usecases/UpdateDirectory.dart';
 import 'package:remotestoragelite/src/presentation/viewmodel/DirectoryViewModel.dart';
 import 'package:remotestoragelite/src/presentation/viewmodel/NetworkConnectionViewModel.dart';
 import 'package:remotestoragelite/src/presentation/viewmodel/ToastMessageViewModel.dart';
@@ -17,6 +22,7 @@ class AppProvider extends MultiProvider {
   AppProvider({super.key, super.child})
       : super(providers: [
           // Repository
+          Provider<StorageRepository>(create: (_) => StorageRepositoryImpl()),
           Provider<NetworkConnectionRepository>(
               create: (_) => NetworkConnectionRepositoryImpl()),
           Provider<ToastMessageRepository>(
@@ -61,9 +67,35 @@ class AppProvider extends MultiProvider {
                 showToastMessage:
                     Provider.of<ShowToastMessage>(context, listen: false)),
           ),
+          Provider(
+              create: (context) => AutoFindStoragePath(
+                  storageRepository:
+                      Provider.of<StorageRepository>(context, listen: false),
+                  showToastMessage: ShowToastMessage(
+                      toastMessageRepository:
+                          Provider.of<ToastMessageRepository>(context,
+                              listen: false)))),
+          Provider(
+              create: (context) => FindStoragePath(
+                  storageRepository:
+                      Provider.of<StorageRepository>(context, listen: false),
+                  showToastMessage: ShowToastMessage(
+                      toastMessageRepository:
+                          Provider.of<ToastMessageRepository>(context,
+                              listen: false)))),
+          Provider(create: (context) => UpdateDirectory()),
 
           // ViewModel
-          ChangeNotifierProvider(create: (context) => DirectoryViewModel()),
+          ChangeNotifierProvider(
+              create: (context) => DirectoryViewModel(
+                    autoFindStoragePath: Provider.of<AutoFindStoragePath>(
+                        context,
+                        listen: false),
+                    findStoragePath:
+                        Provider.of<FindStoragePath>(context, listen: false),
+                    updateDirectory:
+                        Provider.of<UpdateDirectory>(context, listen: false),
+                  )),
           ChangeNotifierProvider(
               create: (context) => NetworkConnectionViewModel(
                   findIpAddress:
