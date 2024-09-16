@@ -83,7 +83,10 @@ class AppProvider extends MultiProvider {
                       toastMessageRepository:
                           Provider.of<ToastMessageRepository>(context,
                               listen: false)))),
-          Provider(create: (context) => UpdateDirectory()),
+          Provider(
+              create: (context) => UpdateDirectory(
+                  storageRepository:
+                      Provider.of<StorageRepository>(context, listen: false))),
 
           // ViewModel
           ChangeNotifierProvider(

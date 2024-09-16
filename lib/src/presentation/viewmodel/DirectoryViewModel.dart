@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:remotestoragelite/src/domain/usecases/AutoFindStoragePath.dart';
 import 'package:remotestoragelite/src/domain/usecases/FindStoragePath.dart';
 import 'package:remotestoragelite/src/domain/usecases/UpdateDirectory.dart';
@@ -12,10 +16,14 @@ class DirectoryViewModel extends ChangeNotifier {
   FindStoragePath findStoragePath;
   UpdateDirectory updateDirectory;
 
+  late StreamSubscription<Directory> _streamSubscription;
+
   DirectoryViewModel(
       {required this.autoFindStoragePath,
       required this.findStoragePath,
-      required this.updateDirectory});
+      required this.updateDirectory}) {
+    _streamSubscription = updateDirectory.link().listen(update);
+  }
 
   Future<void> autoFind() async {
     _rootPath = await autoFindStoragePath();
@@ -27,7 +35,51 @@ class DirectoryViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _rootPath = "C:\\SANS\\PAPYRUS";
+  String _getName(String path) {
+    return path.split(Platform.pathSeparator).last;
+  }
+
+  FileNode _updateFile(File file) {
+    return FileNode(
+        isDirectory: false, name: _getName(file.path), isExpanded: false);
+  }
+
+  FileNode _updateDirectory(Directory directory) {
+    // An algorithm that recycles existing nodes must be added!
+    return FileNode(
+        isDirectory: true,
+        name: _getName(directory.path),
+        isExpanded: true,
+        children: directory.listSync().map((element) {
+          final stat = element.statSync();
+          switch (stat.type) {
+            case FileSystemEntityType.directory:
+              return _updateDirectory(Directory(element.path));
+            case FileSystemEntityType.file:
+              return _updateFile(File(element.path));
+            default:
+              break;
+          }
+          throw UnimplementedError();
+        }).toList());
+  }
+
+  void update(Directory directory) {
+    Logger().d("Update called");
+    _root = _updateDirectory(directory);
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription.cancel();
+    super.dispose();
+  }
+
+  String _rootPath = "";
+  FileNode _root =
+      FileNode(isExpanded: false, name: "", isDirectory: true, children: []);
+  /*
   final _root =
       FileNode(isExpanded: false, name: "_", isDirectory: true, children: [
     FileNode(isExpanded: false, name: "Root", isDirectory: true, children: [
@@ -69,4 +121,5 @@ class DirectoryViewModel extends ChangeNotifier {
     FileNode(
         isExpanded: false, name: "NewRoot", isDirectory: true, children: [])
   ]);
+  */
 }
