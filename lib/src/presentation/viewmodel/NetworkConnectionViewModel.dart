@@ -19,12 +19,19 @@ class NetworkConnectionViewModel extends ChangeNotifier {
       required this.openNetworkConnection,
       required this.closeNetworkConnection}) {
     _portController.addListener(_setPort);
+    _lazyInitialize();
   }
 
   @override
   void dispose() {
     _portController.removeListener(_setPort);
     super.dispose();
+  }
+
+  Future<void> _lazyInitialize() async {
+    _ipAddress = await findIpAddress();
+    _portController.text = await loadPort();
+    notifyListeners();
   }
 
   void _setPort() {

@@ -28,7 +28,7 @@ class NetworkConnectionRepositoryImpl extends NetworkConnectionRepository {
   @override
   // TODO: implement port
   String get port => _port;
-  String _port = "";
+  String _port = "2753";
 
   @override
   void savePort(String port) {
