@@ -9,7 +9,7 @@ class UpdateDirectory {
 
   Stream<Directory> link() {
     return storageRepository.directoryStream.stream.map((event) {
-      Logger().d("New Directory : ${event}");
+      Logger().d("New Directory : $event");
       return event;
     });
   }

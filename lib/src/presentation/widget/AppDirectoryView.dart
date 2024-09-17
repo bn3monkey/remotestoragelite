@@ -10,7 +10,7 @@ class FileNode extends TreeNode<FileNode> {
   })  : _name = name,
         _isDirectory = isDirectory,
         super(isExpandable: isDirectory) {
-    print("sans => isExpandable : ${isExpandable} isExpanded : ${isExpanded}");
+    print("sans => isExpandable : $isExpandable isExpanded : $isExpanded");
   }
 
   String _name;

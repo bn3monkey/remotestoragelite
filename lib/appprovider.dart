@@ -1,7 +1,12 @@
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:remotestoragelite/src/data/repositories/NetworkConnectionRepositoryImpl.dart';
 import 'package:remotestoragelite/src/data/repositories/StorageRepositoryImpl.dart';
 import 'package:remotestoragelite/src/data/repositories/ToastMessageRepositoryImpl.dart';
+import 'package:remotestoragelite/src/data/source/LocalDataSource/LocalDataSource.dart';
+import 'package:remotestoragelite/src/data/source/LocalDataSource/LocalDataSourceFactory.dart';
+import 'package:remotestoragelite/src/data/source/RemoteDataSource/RemoteDataSource.dart';
+import 'package:remotestoragelite/src/data/source/RemoteDataSource/RemoteDataSourceFactory.dart';
 import 'package:remotestoragelite/src/domain/repositories/NetworkConnectionRepository.dart';
 import 'package:remotestoragelite/src/domain/repositories/StorageRepository.dart';
 import 'package:remotestoragelite/src/domain/repositories/ToastMessageRepository.dart';
@@ -21,10 +26,21 @@ import 'package:remotestoragelite/src/presentation/viewmodel/ToastMessageViewMod
 class AppProvider extends MultiProvider {
   AppProvider({super.key, super.child})
       : super(providers: [
+          // Data Source
+          Provider(create: (_) => LocalDataSourceFactory.create()),
+          Provider(create: (_) => RemoteDataSourceFactory.create()),
+
           // Repository
-          Provider<StorageRepository>(create: (_) => StorageRepositoryImpl()),
+          Provider<StorageRepository>(
+              create: (context) => StorageRepositoryImpl(
+                  localDataSource:
+                      Provider.of<LocalDataSource>(context, listen: false))),
           Provider<NetworkConnectionRepository>(
-              create: (_) => NetworkConnectionRepositoryImpl()),
+              create: (context) => NetworkConnectionRepositoryImpl(
+                  localDataSource:
+                      Provider.of<LocalDataSource>(context, listen: false),
+                  remoteDataSource:
+                      Provider.of<RemoteDataSource>(context, listen: false))),
           Provider<ToastMessageRepository>(
               create: (_) => ToastMessageRepositoryImpl()),
 

@@ -47,7 +47,7 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
         body: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(20.0),
             child: Column(children: [
               Expanded(flex: 7, child: DirectoryView()),
               Expanded(flex: 2, child: NetworkConnectionView()),

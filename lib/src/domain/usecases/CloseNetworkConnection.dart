@@ -9,6 +9,6 @@ class CloseNetworkConnection {
       required this.showToastMessage});
 
   Future<void> call() async {
-    return;
+    await networkConnectionRepository.closeNetworkConnection();
   }
 }

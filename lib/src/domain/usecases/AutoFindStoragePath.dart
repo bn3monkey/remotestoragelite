@@ -15,6 +15,7 @@ class AutoFindStoragePath {
     final result = await storageRepository.autoFindDirectory();
     switch (result) {
       case AppResult.success:
+        showToastMessage("");
         return storageRepository.storagePath;
       case AppResult.cannotAccessDirectory:
         showToastMessage(
@@ -23,6 +24,8 @@ class AutoFindStoragePath {
       case AppResult.cannotCreateRemoteStorageDirectory:
         showToastMessage(AppString.of(Config.currentLanguage)
             .errorCannotCreateRemoteStorageDirectory);
+        break;
+      default:
         break;
     }
 

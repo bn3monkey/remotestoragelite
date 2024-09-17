@@ -5,14 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:remotestoragelite/src/core/util/values/results/AppResult.dart';
+import 'package:remotestoragelite/src/data/source/LocalDataSource/LocalDataSource.dart';
 import 'package:remotestoragelite/src/domain/repositories/StorageRepository.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:path/path.dart' as p;
 import 'package:watcher/watcher.dart';
 
 class StorageRepositoryImpl extends StorageRepository {
-  String get storagePath => _storagePath;
-  String _storagePath = "";
+  LocalDataSource localDataSource;
+  StorageRepositoryImpl({required this.localDataSource});
+
+  @override
+  String get storagePath => localDataSource.storagePath;
 
   @override
   Future<AppResult> autoFindDirectory() async {
@@ -25,7 +29,7 @@ class StorageRepositoryImpl extends StorageRepository {
     }
 
     final newPath = p.join(docuemntDirectory.path, "AlimData");
-    Logger().d("New Path is ${newPath}");
+    Logger().d("New Path is $newPath");
 
     final subDirectory = Directory(newPath);
     subDirectory.createSync(recursive: true);
@@ -34,10 +38,10 @@ class StorageRepositoryImpl extends StorageRepository {
       return AppResult.cannotCreateRemoteStorageDirectory;
     }
 
-    _storagePath = subDirectory.path;
+    localDataSource.storagePath = subDirectory.path;
 
-    sendDirectoryEvent(Directory(_storagePath));
-    _registerWatcher(_storagePath);
+    sendDirectoryEvent(Directory(localDataSource.storagePath));
+    _registerWatcher(localDataSource.storagePath);
 
     return AppResult.success;
   }
@@ -52,16 +56,16 @@ class StorageRepositoryImpl extends StorageRepository {
 
     if (directoryPath == null) return AppResult.cannotAccessDirectory;
 
-    _storagePath = directoryPath;
+    localDataSource.storagePath = directoryPath;
 
-    sendDirectoryEvent(Directory(_storagePath));
-    _registerWatcher(_storagePath);
+    sendDirectoryEvent(Directory(localDataSource.storagePath));
+    _registerWatcher(localDataSource.storagePath);
 
     return AppResult.success;
   }
 
-  DirectoryWatcher? _directoryWatcher = null;
-  StreamSubscription<WatchEvent>? _subscription = null;
+  DirectoryWatcher? _directoryWatcher;
+  StreamSubscription<WatchEvent>? _subscription;
 
   Future<void> _registerWatcher(String path) async {
     if (_directoryWatcher != null) {

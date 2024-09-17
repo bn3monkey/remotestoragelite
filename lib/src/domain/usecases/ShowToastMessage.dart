@@ -7,7 +7,7 @@ class ShowToastMessage {
 
   Stream<String> link() {
     return toastMessageRepository.message.stream.map((event) {
-      Logger().d("New Toast Message : ${event}");
+      Logger().d("New Toast Message : $event");
       return event;
     });
   }
